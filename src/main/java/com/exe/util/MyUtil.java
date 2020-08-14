@@ -3,27 +3,27 @@
 public class MyUtil {
 	
 	//전체 페이지수 구하기
-	//numPerPage : 한화면에 표시할 데이터의 갯수
-	//dataCount : 전체 데이터의 갯수
+	//numPerPage : 한화면에 표시할 데이터의 갯수 ---5
+	//dataCount : 전체 데이터의 갯수 --- all
 	public int getPageCount(int numPerPage, int dataCount){
 		
 		int pageCount = 0;
 		pageCount = dataCount / numPerPage;
 		
 		if(dataCount % numPerPage != 0)
-			pageCount++;
+			pageCount++;	//나머지가 0이 아니면 한페이지 더 나와야한다.
 		
 		return pageCount;
 	}
 	
 	//페이징 처리 메소드
-	//currentPage :현재 표시할 페이지
+	//currentPage :현재 표시 페이지
 	//totalPage : 전체 페이지수
 	//listUrl : 링크를 설정할 url
 	public String pageIndexList(int currentPage, int totalPage, String listUrl){
 		
 		int numPerBlock = 5; //1◀이전 6 7 8 9 10 다음▶11(6-10까지 표시되는 페이지 갯수)
-		int currentPageSetup; //표시할 첫 페이지(6)의 – 1 해준 값(5,10,15,20...)
+		int currentPageSetup; //표시할 첫 페이지(6)의 – 1 해준 값(5,10,15,20...) -> ◀이전 에 표시될 값
 		int page;
 		
 		StringBuffer sb = new StringBuffer();
@@ -38,10 +38,10 @@ public class MyUtil {
 			listUrl = listUrl + "?";
 		
 		//표시할 첫 페이지의 – 1 해준 값
-		currentPageSetup = (currentPage/numPerBlock)*numPerBlock;
+		currentPageSetup = (currentPage/numPerBlock)*numPerBlock;	// (6,7,8,9)/5=1*5=5
 		
-		if(currentPage % numPerBlock == 0)
-			currentPageSetup = currentPageSetup - numPerBlock;
+		if(currentPage % numPerBlock == 0)	//10%5=0
+			currentPageSetup = currentPageSetup - numPerBlock;	//10-5
 		
 		//◀이전
 		if(totalPage > numPerBlock && currentPageSetup > 0){
@@ -53,21 +53,21 @@ public class MyUtil {
 		//바로가기 페이지
 		page = currentPageSetup + 1;
 		
-		while(page <= totalPage && page <= (currentPageSetup + numPerBlock)){
+		while(page <= totalPage && page <= (currentPageSetup + numPerBlock)){	//전체페이지수(다음이 없을경우) or 다음▶ 보다 작은수를 페이지로
 			
 			if(page == currentPage){				
 				
-				sb.append("<font color=\"Fuchsia\">" + page + "</font>&nbsp;");				
+				sb.append("<font color=\"Fuchsia\">" + page + "</font>&nbsp;");	//현재페이지이면 color를 다르게
 			}else{
 				
 				sb.append("<a href=\"" + listUrl + "pageNum=" + page + "\">"
-						+ page + "</a>&nbsp;");
+						+ page + "</a>&nbsp;");	//현재페이지가 아니면 같은색으로
 			}
 			page++;
 		}
 		
 		//다음▶
-		if(totalPage - currentPageSetup > numPerBlock){
+		if(totalPage - currentPageSetup > numPerBlock){	//다음페이지로 넘길 데이터 존재시..
 						
 			sb.append("<a href=\"" + listUrl + "pageNum=" + page + "\">다음▶</a>&nbsp;");
 		}

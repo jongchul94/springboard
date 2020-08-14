@@ -12,6 +12,13 @@
 <link rel="stylesheet" href="/springboard/resources/css/style.css" type="text/css"/>
 <link rel="stylesheet" href="/springboard/resources/css/article.css" type="text/css"/>
 
+<script type="text/javascript">
+
+	/* 팝업 or 모달... */
+	
+	
+</script>
+
 </head>
 <body>
 
@@ -63,9 +70,12 @@
 		
 		<input type="button" value=" 수정 " class="btn2" 
 		onclick="javascript:location.href='<%=cp%>/updated.action?num=${dto.num }&pageNum=${pageNum }'"/>
+		
 		<input type="button" value=" 삭제 " class="btn2" 
 		onclick="javascript:location.href='<%=cp%>/deleted.action?num=${dto.num }&pageNum=${pageNum }'"/>
-		</div>		
+		
+		</div>
+		
 		<div id="rightFooter">
 		<input type="button" value=" 리스트 " class="btn2" 
 		onclick="javascript:location.href='<%=cp%>/list.action?${params }'"/>

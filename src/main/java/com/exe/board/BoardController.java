@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,9 +14,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.exe.dao.BoardDAO;
+import com.exe.dao.UserDAO;
 import com.exe.dto.BoardDTO;
+import com.exe.dto.UserDTO;
 import com.exe.util.MyUtil;
 
 @Controller
@@ -23,12 +27,107 @@ public class BoardController {
 	
 	@Autowired
 	@Qualifier("boardDAO")
-	BoardDAO dao;
+	BoardDAO bdao;
+	
+	@Autowired
+	@Qualifier("userDAO")
+	UserDAO udao;
 	
 	@Autowired
 	@Qualifier("myUtil")
 	MyUtil myUtil;
 	
+	//user
+	@RequestMapping(value = "/regist.action", method = {RequestMethod.GET, RequestMethod.POST})
+	public ModelAndView regist() {
+		
+		ModelAndView mav = new ModelAndView();
+		
+		mav.setViewName("user/regist");
+		
+		return mav;
+	}
+	
+	@RequestMapping(value = "/regist_ok.action", method = {RequestMethod.GET, RequestMethod.POST})
+	public String regist_ok(UserDTO dto, HttpServletRequest req, HttpServletResponse res) {
+		
+		udao.registUser(dto);
+		
+		return "redirect:/registOK.action";
+	}
+	
+	@RequestMapping(value = "/registOK.action", method = {RequestMethod.GET, RequestMethod.POST})
+	public ModelAndView registOK() {
+		
+		ModelAndView mav = new ModelAndView();
+		
+		mav.setViewName("user/registOK");
+		
+		return mav;
+	}
+	
+	@RequestMapping(value = "/login.action", method = {RequestMethod.GET, RequestMethod.POST})
+	public ModelAndView login() {
+		
+		ModelAndView mav = new ModelAndView();
+		
+		mav.setViewName("user/login");
+		
+		return mav;
+	}
+	
+	@RequestMapping(value = "/login_ok.action", method = {RequestMethod.GET, RequestMethod.POST})
+	public ModelAndView login_ok(String userID, String userPwd, HttpServletRequest req, HttpServletResponse res, HttpSession session) {
+		
+		System.out.println(userID);
+		System.out.println(userPwd);
+		
+		ModelAndView mav = new ModelAndView();
+		
+		UserDTO dto = new UserDTO();
+		
+		dto = udao.userOne(userID);
+		
+		//System.out.println(dto);
+		//System.out.println(dto.getUserID());
+		//System.out.println(dto.getUserPwd());
+		
+		if(dto==null || !dto.getUserPwd().equals(userPwd)) {		//	 || dto.getUserPwd()!=userPwd || !dto.getUserPwd().equals(userPwd) 작동하지않음...
+			mav.setViewName("user/login");
+			mav.addObject("message", "아이디가 없거나 비밀번호가 일치하지 않습니다.");
+			
+			return mav;
+		}
+		
+		session.setAttribute("userID", dto.getUserID());
+		session.setAttribute("userName", dto.getUserName());
+		session.setAttribute("userEmail", dto.getUserEmail());
+		
+		mav.setView(new RedirectView("list.action"));
+		
+		return mav;
+	}
+	
+	@RequestMapping(value = "/logout.action", method = {RequestMethod.GET, RequestMethod.POST})
+	public ModelAndView logout(HttpServletRequest req, HttpServletResponse res, HttpSession session) {
+		
+		ModelAndView mav = new ModelAndView();
+		
+		session.removeAttribute("userID");
+		session.removeAttribute("userName");
+		session.removeAttribute("userEmail");
+		
+		mav.setView(new RedirectView("list.action"));
+		
+		return mav;
+	}
+	
+	
+	
+	
+	
+	
+	//board
 	@RequestMapping(value = "/created.action", method = {RequestMethod.GET, RequestMethod.POST})
 	public ModelAndView created() {
 		
@@ -44,12 +143,12 @@ public class BoardController {
 	@RequestMapping(value = "/created_ok.action", method = {RequestMethod.GET, RequestMethod.POST})
 	public String created_ok(BoardDTO dto, HttpServletRequest req, HttpServletResponse res) {
 		
-		int maxNum = dao.getMaxNum();
+		int maxNum = bdao.getMaxNum();
 		
 		dto.setNum(maxNum + 1);
 		dto.setIpAddr(req.getRemoteAddr());
 		
-		dao.insert(dto);
+		bdao.insert(dto);
 		
 		return "redirect:/list.action";
 	}
@@ -80,7 +179,7 @@ public class BoardController {
 		}
 		
 		//전체데이터갯수
-		int dataCount = dao.getDataCount(searchKey, searchValue);	//게시물 총 개수
+		int dataCount = bdao.getDataCount(searchKey, searchValue);	//게시물 총 개수
 		
 		//전체페이지수
 		int numPerPage = 5;	//페이지 하나의 보여줄 데이터 개수
@@ -90,11 +189,12 @@ public class BoardController {
 		if(currentPage > totalPage)
 			currentPage = totalPage;
 		
+		//페이징 시작,끝
 		int start = (currentPage-1)*numPerPage+1;	//1,6,11, ...
 		int end = currentPage*numPerPage;			//5,10,15, ...
 		
 		List<BoardDTO> lists =
-			dao.list(start, end, searchKey, searchValue);
+			bdao.list(start, end, searchKey, searchValue);
 		
 		//페이징 처리
 		String param = "";
@@ -104,13 +204,14 @@ public class BoardController {
 				+ URLEncoder.encode(searchValue, "UTF-8");
 		}
 		
+		// 각각의 URL을 만들 기본 URL --- listUrl = "localhost:8080/springboard/list.action?searchKey=''&searchValue=''";
 		String listUrl = cp + "/list.action";
 		if(!param.equals("")){
 			listUrl = listUrl + "?" + param;
 		}
 		
 		String pageIndexList =
-			myUtil.pageIndexList(currentPage, totalPage, listUrl);
+			myUtil.pageIndexList(currentPage, totalPage, listUrl);	//페이징처리 String값 넘어옴, ex. ◀이전 6 7 8 9 10 다음▶
 		
 		//글보기 주소 정리
 		String articleUrl = 
@@ -131,10 +232,10 @@ public class BoardController {
 		
 		mav.setViewName("bbs/list");
 		
-		mav.addObject("lists", lists);
-		mav.addObject("pageIndexList",pageIndexList);
-		mav.addObject("dataCount",dataCount);
-		mav.addObject("articleUrl",articleUrl);
+		mav.addObject("lists", lists);			//게시물 각각을 List로 담아놓음
+		mav.addObject("pageIndexList",pageIndexList);	//페이징처리
+		mav.addObject("dataCount",dataCount);	//전체 데이터 개수, 게시물 존재여부
+		mav.addObject("articleUrl",articleUrl);	//게시물 링크
 		
 		return mav;
 	}
@@ -151,9 +252,9 @@ public class BoardController {
 		if(searchKey != null)
 			searchValue = URLDecoder.decode(searchValue, "UTF-8");
 		
-		dao.updateHitCount(num);
+		bdao.updateHitCount(num);
 		
-		BoardDTO dto = dao.getData(num);
+		BoardDTO dto = bdao.getData(num);
 		
 		int lineSu = dto.getContent().split("\n").length;	//줄수 엔터수로 체크
 		
@@ -184,7 +285,7 @@ public class BoardController {
 		int num = Integer.parseInt(req.getParameter("num"));
 		String pageNum = req.getParameter("pageNum");
 		
-		BoardDTO dto = dao.getData(num);
+		BoardDTO dto = bdao.getData(num);
 		
 		ModelAndView mav = new ModelAndView();
 		
@@ -201,7 +302,7 @@ public class BoardController {
 	
 		String pageNum = req.getParameter("pageNum");
 		
-		dao.updateData(dto);
+		bdao.updateData(dto);
 		
 		return "redirect:/list.action?pageNum=" + pageNum;
 	}
@@ -213,7 +314,7 @@ public class BoardController {
 		int num =Integer.parseInt(request.getParameter("num"));
 		String pageNum = request.getParameter("pageNum");
 		
-		dao.deleteData(num);
+		bdao.deleteData(num);
 		
 		return "redirect:/list.action?pageNum=" + pageNum;
 	}

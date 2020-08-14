@@ -28,6 +28,7 @@ PUBLIC "-/mybatis.org//DTD Config 3.0//EN"
 	<!-- Sql Mapper / 이 부분이 필요 -->
 	<mappers>
 		<mapper resource="com/exe/mapper/boardMapper.xml"/>
+		<mapper resource="com/exe/mapper/userMapper.xml"/>
 	</mappers>
 
 </configuration>

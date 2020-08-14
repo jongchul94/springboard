@@ -44,10 +44,30 @@
 		}
 		*/
 		f.name.value = str;
-		
+		/* 
 		if(f.email.value){
 			
 			if(!isValidEmail(f.email.value)){
+				alert("\n정상적인 E-Mail을 입력하세요.");
+				f.email.focus();
+				return;
+			}
+		}
+		 */
+		
+		str = f.email.value;
+		str = str.trim();
+		
+		if(!str){
+			alert("E-Mail을 입력하세요.");
+			f.email.focus();
+			return;
+		}
+		f.email.value = str;
+		
+		if(str){
+			
+			if(!isValidEmail(str)){
 				alert("\n정상적인 E-Mail을 입력하세요.");
 				f.email.focus();
 				return;
@@ -105,7 +125,7 @@
 				<dt>작성자</dt>
 				<dd>
 					<input type="text" name="name" size="35" maxlength="20" class="boxTF"
-					value="${sessionScope.session.userName}"/>
+					value="${sessionScope.userID}"/>
 				</dd>							
 			</dl>		
 		</div>
@@ -114,7 +134,8 @@
 			<dl>
 				<dt>E-Mail</dt>
 				<dd>
-					<input type="text" name="email" size="35" maxlength="50" class="boxTF"/>
+					<input type="text" name="email" size="35" maxlength="50" class="boxTF"
+					value="${sessionScope.userEmail}"/>
 				</dd>							
 			</dl>		
 		</div>

@@ -63,7 +63,7 @@
 		}
 		f.content.value = str;
 		
-		
+		/* 
 		str = f.pwd.value;
 		str = str.trim();
 		if(!str){
@@ -72,6 +72,13 @@
 			return;
 		}
 		f.pwd.value = str;
+		 */
+		
+		if(f.pwd.value!=${dto.pwd}){
+			alert("\n패스워드가 일치하지 않습니다.");
+			f.pwd.focus();
+			return;
+		}
 		
 		
 		f.action = "<%=cp%>/updated_ok.action";

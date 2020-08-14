@@ -31,6 +31,24 @@
 <body>
 
 <div id="bbsList">
+
+<div align="right"> 
+
+	<c:choose>
+	
+	<c:when test="${empty sessionScope.userID }">
+		<a href="login.action">로그인</a> / 
+		<a href="regist.action">회원가입</a>
+	</c:when>
+	
+	<c:otherwise>
+		${sessionScope.userName }님 환영합니다;; / <a href="logout.action">로그아웃</a>
+	</c:otherwise>
+	
+	</c:choose>
+	 
+</div><br>
+
 	<div id="bbsList_title">
 	게 시 판(Spring)
 	</div>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-/mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="userMapper">
+
+<insert id="registUser" parameterType="com.exe.dto.UserDTO">
+	insert into bbsUser (userID,userPwd,userName,userEmail,userPhone)
+	values (#{userID},#{userPwd},#{userName},#{userEmail},#{userPhone})
+</insert>
+
+<select id="userOne" parameterType="String" resultType="com.exe.dto.UserDTO">
+	select userID,userPwd,userName,userEmail,userPhone from bbsUser
+	where userID=#{userID}
+</select>
+
+</mapper>
